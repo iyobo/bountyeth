@@ -1,15 +1,17 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
 library Structs {
 
     struct Bounty {
         address creator;
-        byte32 targetName;
-        byte32 targetDescription;
-        uint ethPrice;
+        bytes32 targetName;
+        bytes32 targetDescription;
+        uint reward;
+
+        uint postedOn;
 
         address fulfiller;
-        byte32 fulfillerNickname; //optional. In case the bounty hunter that fulfilled this wants to market their name.
+        bytes32 fulfillerNickname; //optional. In case the bounty hunter that fulfilled this wants to market their name.
         bool fulfilled;
     }
 

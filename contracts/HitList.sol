@@ -1,64 +1,77 @@
-pragma solidity ^0.4.17;
+pragma solidity ^0.4.18;
 
-import {Bounty} from "./Structs.sol";
 import "eth-random/contracts/Random.sol";
+import "./Structs.sol";
 
 contract HitList {
 
-    byte32 private listTitle;
-    uint private listFeePercentage;
-    Address private listOwner;
+    bytes32 private listTitle;
+    address private listOwner;
 
+    // All Monetary units are in wei
+    uint private listFee; // This is what we charge to create a bounty on our list
+    uint private escrow; // This is where funds are held upon completion of bounties
+    uint private revenue; // This is what we calculate so far as the money we have made from the HitList platform. TODO: can be a contract all its own with an address
+
+    // Bounties
     uint private numBounties;
-    Bounty[] private  bounties;
-    mapping(uint => uint64) private bountyReleaseKeys;
+    Structs.Bounty[] private  bounties;
+    mapping(uint => uint) private bountyReleaseKeys;
 
     //Random number generator
     Random private random;
 
-    //Creates a HitList with a given title that collects and sends a certain percentage of all bounty fulfillments to the list owner's address. Kaching!.
-    function HitList(byte32 title, uint feePercentage) {
+    //    Creates a HitList with a given title that collects and sends a certain percentage of all bounty fulfillments to the list owner's address. Kaching!.
+    function HitList(bytes32 title, uint fee) public {
         listTitle = title;
-        listFeePercentage = feePercentage;
+        listFee = fee;
         listOwner = msg.sender;
-        //
+
+
+        escrow = 0;
 
         random = Random(this);
     }
 
     //Anyone can create a bounty
-    function createBounty(byte32 targetName, byte32 targetDescription, uint ethPrice) returns (uint){
+    function createBounty(bytes32 targetName, bytes32 targetDescription, uint reward) public payable returns (uint){
 
         uint bountyId = numBounties++;
 
+        //TODO: collect reward money (for escrow) AND fee (for revenue)
+        //Payment value must be large enough to cover reward and listFee
+        require(msg.value > reward + listFee);
+//        msg.sender.transfer(reward);
+
         uint releaseKey = random.random(6);
-        bounties[bountyId] = Bounty(msg.sender, targetName, targetDescription, ethPrice);
+        bounties[bountyId] = Structs.Bounty(msg.sender, targetName, targetDescription, reward, now, 0, 0, false);
         bountyReleaseKeys[bountyId] = releaseKey;
 
         return releaseKey;
     }
 
     //Get all bounties
-    //TODO: Implement pager
-    function getBounties() returns (Bounty[]){
+    //FUTURE: Implement pager
+    function getBounties() public returns (Structs.Bounty[]){
 
         return bounties;
     }
 
     // Release a bounty's ethPrice to the sender of this mesage, if they have the right key.
-    function fulfillBounty(uint bountyId, uint64 releaseKey, byte32 fulfillerName) returns (bool){
+    function fulfillBounty(uint bountyId, uint64 releaseKey, bytes32 nickname) public returns (bool){
 
         if (bountyReleaseKeys[bountyId] != releaseKey) {
             return false;
         }
 
         //It's the right key so Release funds to sender
-        Bounty bounty = bounties[bountyId];
+        Structs.Bounty storage bounty = bounties[bountyId];
 
-        //TODO: send coins
+        //Send money to bounty hunter
+        msg.sender.transfer(bounty.reward);
 
         bounty.fulfiller = msg.sender;
-        bounty.fulfillerName = true;
+        bounty.fulfillerNickname = nickname;
         bounty.fulfilled = true;
         bounties[bountyId] = bounty;
         return true;
