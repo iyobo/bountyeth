@@ -50,6 +50,7 @@
     },
     "dependencies": {
         "dotenv": "^2.0.0",
+        "eth-random": "0.0.4-alpha.1",
         "react": "^15.4.2",
         "react-dom": "^15.4.2"
     },

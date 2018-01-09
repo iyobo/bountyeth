@@ -5,7 +5,7 @@ library Structs {
     struct Bounty {
         address creator;
         bytes32 targetName;
-        bytes32 targetDescription;
+        string targetDescription;
         uint reward;
 
         uint postedOn;

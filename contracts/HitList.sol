@@ -34,14 +34,14 @@ contract HitList {
     }
 
     //Anyone can create a bounty
-    function createBounty(bytes32 targetName, bytes32 targetDescription, uint reward) public payable returns (uint){
+    function createBounty(bytes32 targetName, string targetDescription, uint reward) public payable returns (uint){
 
         uint bountyId = numBounties++;
 
         //TODO: collect reward money (for escrow) AND fee (for revenue)
         //Payment value must be large enough to cover reward and listFee
         require(msg.value > reward + listFee);
-//        msg.sender.transfer(reward);
+        //        msg.sender.transfer(reward);
 
         uint releaseKey = random.random(6);
         bounties[bountyId] = Structs.Bounty(msg.sender, targetName, targetDescription, reward, now, 0, 0, false);
@@ -52,9 +52,19 @@ contract HitList {
 
     //Get all bounties
     //FUTURE: Implement pager
-    function getBounties() public returns (Structs.Bounty[]){
+    function getBounties() public view returns (Structs.Bounty[]){
 
         return bounties;
+    }
+
+    function getBounty(uint bountyId) public view returns (Structs.Bounty){
+
+        return bounties[bountyId];
+    }
+
+    function getBountyTargetName(uint bountyId) public view returns (bytes32){
+
+        return bounties[bountyId].targetName;
     }
 
     // Release a bounty's ethPrice to the sender of this mesage, if they have the right key.
