@@ -16,38 +16,40 @@ contract HitList {
     // Bounties
     uint private numBounties;
     Structs.Bounty[] private  bounties;
-    mapping(uint => uint) private bountyReleaseKeys;
+    mapping(uint => bytes32) private bountyReleaseKeys;
 
     //Random number generator
     Random private random;
 
     //    Creates a HitList with a given title that collects and sends a certain percentage of all bounty fulfillments to the list owner's address. Kaching!.
-    function HitList(bytes32 title, uint fee) public {
-        listTitle = title;
-        listFee = fee;
-        listOwner = msg.sender;
-
-
-        escrow = 0;
-
-        random = Random(this);
-    }
+    //    function HitList(bytes32 title, uint fee) public {
+    //        listTitle = title;
+    //        listFee = fee;
+    //        listOwner = msg.sender;
+    //
+    //
+    //        escrow = 0;
+    //
+    //        random = Random(this);
+    //    }
 
     //Anyone can create a bounty
-    function createBounty(bytes32 targetName, string targetDescription, uint reward) public payable returns (uint){
+    function createBounty(bytes32 targetName, bytes32 targetDescription, uint reward) public returns (uint, bytes32){
 
         uint bountyId = numBounties++;
 
         //TODO: collect reward money (for escrow) AND fee (for revenue)
         //Payment value must be large enough to cover reward and listFee
-        require(msg.value > reward + listFee);
+        //        require(msg.value > reward + listFee);
         //        msg.sender.transfer(reward);
 
-        uint releaseKey = random.random(6);
+        bytes32 releaseKey = "releaseTheKraken";
+        //TODO: generate this
+        log0(releaseKey);
         bounties[bountyId] = Structs.Bounty(msg.sender, targetName, targetDescription, reward, now, 0, 0, false);
         bountyReleaseKeys[bountyId] = releaseKey;
 
-        return releaseKey;
+        return (bountyId, releaseKey);
     }
 
     //Get all bounties
@@ -57,9 +59,9 @@ contract HitList {
         return bounties;
     }
 
-    function getBounty(uint bountyId) public view returns (Structs.Bounty){
+    function getBounty(uint bountyId) public view returns (uint, bytes32, bytes32, uint, uint, bool){
 
-        return bounties[bountyId];
+        return (bountyId, bounties[bountyId].targetName, bounties[bountyId].targetDescription, bounties[bountyId].reward, bounties[bountyId].postedTimestamp, bounties[bountyId].fulfilled);
     }
 
     function getBountyTargetName(uint bountyId) public view returns (bytes32){
@@ -68,7 +70,7 @@ contract HitList {
     }
 
     // Release a bounty's ethPrice to the sender of this mesage, if they have the right key.
-    function fulfillBounty(uint bountyId, uint64 releaseKey, bytes32 nickname) public returns (bool){
+    function fulfillBounty(uint bountyId, bytes32 releaseKey, bytes32 nickname) public returns (bool){
 
         if (bountyReleaseKeys[bountyId] != releaseKey) {
             return false;

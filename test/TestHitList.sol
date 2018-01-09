@@ -10,12 +10,12 @@ contract TestHitList {
     function testItCreatesABounty() public {
         HitList hitList = HitList(DeployedAddresses.HitList());
 
-        uint releaseKey = hitList.createBounty("The Joker", "Dresses like a clown and likes to rob banks", 950);
+        var (bountyId, passkey) = hitList.createBounty("The Joker", "http://bit.ly/xxxx", 950);
 
         // assertions
         //Waiting for https://github.com/ethereum/solidity/pull/3272 to memorize returned struct
-        bytes32 targetName = hitList.getBountyTargetName(0);
-        Assert.equal(targetName, "The Joker", "targetName should be 'The Joker'");
+        Assert.equal(bountyId, 1, "Bounty Id should be 1");
+        Assert.notEqual(passkey, 0, "release key must not be null");
 
     }
 

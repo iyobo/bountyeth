@@ -5,10 +5,10 @@ library Structs {
     struct Bounty {
         address creator;
         bytes32 targetName;
-        string targetDescription;
+        bytes32 targetDescription;
         uint reward;
 
-        uint postedOn;
+        uint postedTimestamp;
 
         address fulfiller;
         bytes32 fulfillerNickname; //optional. In case the bounty hunter that fulfilled this wants to market their name.
