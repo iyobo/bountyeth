@@ -3,14 +3,14 @@ pragma solidity ^0.4.17;
 library Structs {
 
     struct Bounty {
-        address public creator;
-        byte32 public targetName;
-        byte32 public targetDescription;
-        uint public ethPrice;
+        address creator;
+        byte32 targetName;
+        byte32 targetDescription;
+        uint ethPrice;
 
-        address public fulfiller;
-        byte32 public fulfillerName;
-        bool public fulfilled;
+        address fulfiller;
+        byte32 fulfillerNickname; //optional. In case the bounty hunter that fulfilled this wants to market their name.
+        bool fulfilled;
     }
 
 }
