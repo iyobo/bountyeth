@@ -21,6 +21,11 @@ contract HitList {
     //Random number generator
     Random private random;
 
+    //events
+    event bountyBeforeCreate(uint bountyId);
+    event BountyCreated(uint bountyId, bytes32 targetName);
+    event bountyFulfilled(uint bountyId, bytes32 targetName);
+
     //    Creates a HitList with a given title that collects and sends a certain percentage of all bounty fulfillments to the list owner's address. Kaching!.
     //    function HitList(bytes32 title, uint fee) public {
     //        listTitle = title;
@@ -38,6 +43,8 @@ contract HitList {
 
         uint bountyId = numBounties++;
 
+        bountyBeforeCreate(bountyId);
+
         //TODO: collect reward money (for escrow) AND fee (for revenue)
         //Payment value must be large enough to cover reward and listFee
         //        require(msg.value > reward + listFee);
@@ -45,18 +52,27 @@ contract HitList {
 
         bytes32 releaseKey = "releaseTheKraken";
         //TODO: generate this
-        log0(releaseKey);
+        //        log0(releaseKey);
         bounties[bountyId] = Structs.Bounty(msg.sender, targetName, targetDescription, reward, now, 0, 0, false);
         bountyReleaseKeys[bountyId] = releaseKey;
+
+        BountyCreated(bountyId, targetName);
 
         return (bountyId, releaseKey);
     }
 
     //Get all bounties
-    //FUTURE: Implement pager
-    function getBounties() public view returns (Structs.Bounty[]){
+    function getBounties() public view returns (uint[] bountyIds, bytes32[] targetNames, bytes32[] targetDescriptions, uint[] postedTimestamps, bool[] fulfilleds){
 
-        return bounties;
+        //TODO: Implement paging!
+        for (uint i = 0; i < numBounties; i++) {
+            bountyIds[i] = i;
+            targetNames[i] = bounties[i].targetName;
+            targetDescriptions[i] = bounties[i].targetDescription;
+            postedTimestamps[i] = bounties[i].postedTimestamp;
+            fulfilleds[i] = bounties[i].fulfilled;
+
+        }
     }
 
     function getBounty(uint bountyId) public view returns (uint, bytes32, bytes32, uint, uint, bool){
